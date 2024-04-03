@@ -1,0 +1,11 @@
+export const THEME_BG_PRIMARY = "#361d32";
+export const THEME_BG_SECONDARY = "#543c52";
+export const THEME_BG_TERTIARY = "#d7e8f7";
+export const THEME_COLOR_PRIMARY = "#f55951";
+export const THEME_COLOR_SECONDARY = "#edd2cb";
+export const THEME_COLOR_TERTIARY = "#f1e8e6";
+export const THEME_COLOR_4 = "#72bdff";
+export const THEME_COLOR_5 = "#3fdfb7";
+export const WHITE = "#ffffff";
+export const ERROR = "#A60F0F";
+export const SUCCESS = "#56db8b";
