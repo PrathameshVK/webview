@@ -280,7 +280,7 @@ const Room = () => {
 
   const clickToCopy = () => {
     navigator.clipboard
-      .writeText(`${window.location.origin}/?roomId=${peerId}`)
+      .writeText(`${window.location.origin}/room?roomId=${peerId}`)
       .then(() => {
         showSuccessToast({ message: "Room url copied to clipboard" });
         toggleShowRoomInfo();
