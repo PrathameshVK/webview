@@ -1,20 +1,21 @@
+import { doc, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
+import { db } from "../../firebase";
 import { useAuth } from "./AuthContext";
 import { Button } from "./common/Buttons";
 import FlexBox from "./common/Flexbox";
 import { InputBox } from "./common/Inputs";
 import Layout from "./common/Layout";
+import { showErrorToast, showSuccessToast } from "./common/Toast";
 import { H1, H3, Title } from "./common/Typography";
 import {
   THEME_BG_PRIMARY,
   THEME_COLOR_4,
   THEME_COLOR_PRIMARY,
 } from "./common/colors";
-import { doc, setDoc } from "firebase/firestore";
-import { db } from "../../firebase";
 
 const Container = styled(FlexBox)`
   flex-direction: column;
@@ -87,22 +88,52 @@ const Auth = () => {
   };
 
   const handleAuthentication = async () => {
-    if (!isEmailValid(email) || password.length === 0) return;
-    try {
-      setIsLoading(true);
-      if (loginFlow) {
-        await login(email, password);
+    if (loginFlow) {
+      if (!isEmailValid(email) || password.length === 0) {
+        showErrorToast({ message: "Invalid Credentials" });
+        return;
       } else {
-        await signup(email, password).then((currentUser) => {
-          setDoc(doc(db, "users", currentUser.user.uid), {
-            username: username,
+        try {
+          setIsLoading(true);
+          await login(email, password);
+        } catch (error) {
+          console.log(error);
+          showErrorToast({
+            message: "Login failed",
           });
-        });
+        } finally {
+          setIsLoading(false);
+        }
       }
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading(false);
+    } else {
+      if (
+        username.length === 0 ||
+        !isEmailValid(email) ||
+        password.length === 0
+      ) {
+        showErrorToast({
+          message: "Please enter valid credentials",
+        });
+        return;
+      } else {
+        try {
+          setIsLoading(true);
+          await signup(email, password).then((currentUser) => {
+            setDoc(doc(db, "users", currentUser.user.uid), {
+              username: username,
+            });
+          });
+          showSuccessToast({
+            message: "Signed up successfully",
+          });
+        } catch (error) {
+          showErrorToast({
+            message: "Signin failed",
+          });
+        } finally {
+          setIsLoading(false);
+        }
+      }
     }
   };
   return (

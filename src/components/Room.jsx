@@ -18,6 +18,7 @@ import loader from "../assets/loader.svg";
 import { IconButton } from "./common/Buttons";
 import FlexBox from "./common/Flexbox";
 import { Modal } from "./common/Modal";
+import { showErrorToast, showSuccessToast } from "./common/Toast";
 import { Subtitle, Title } from "./common/Typography";
 import {
   ERROR,
@@ -52,6 +53,10 @@ const SelfVideo = styled.video`
     width: 7rem;
   }
 `;
+
+// const RemoteContainer = styled.div`
+//   position: relative;
+// `;
 
 const RemoteVideo = styled.video`
   height: 100dvh;
@@ -116,11 +121,14 @@ const Room = () => {
   const [incomingCall, setIncomingCall] = useState(false);
   const [showRoomInfo, setShowRoomInfo] = useState(false);
   const [remoteUserId, setRemoteUserId] = useState("");
+  // const [remoteAudioMuted, setRemoteAudioMuted] = useState(false);
+  // const [remoteVideoMuted, setRemoteVideoMuted] = useState(false);
   const remoteVideoRef = useRef(null);
   const localVideoRef = useRef(null);
   const peerInstance = useRef(null);
   const streamRef = useRef(null);
   const currentCallRef = useRef(null);
+  const dataConnectionRef = useRef(null);
 
   const navigate = useNavigate();
 
@@ -143,8 +151,9 @@ const Room = () => {
     });
 
     peer.on("connection", (conn) => {
+      dataConnectionRef.current = conn;
       conn.on("data", (data) => {
-        setRemoteUserId(data);
+        handleData(data);
       });
     });
     peerInstance.current = peer;
@@ -156,6 +165,18 @@ const Room = () => {
       handleCall(roomId);
     }
   }, [roomId, peerId]);
+
+  const handleData = (data) => {
+    if ("username" in data) {
+      setRemoteUserId(data.username);
+    }
+    // } else if ("remoteAudioMuted" in data) {
+    //   console.log(data.remoteAudioMuted);
+    //   setRemoteAudioMuted(data.remoteAudioMuted);
+    // } else if ("remoteVideoMuted" in data) {
+    //   setRemoteVideoMuted(data.remoteVideoMuted);
+    // }
+  };
 
   const handleCall = (roomId) => {
     const currentUserName = localStorage.getItem("userData");
@@ -173,11 +194,14 @@ const Room = () => {
         localVideoRef.current.play();
 
         const dataConnection = peerInstance.current.connect(roomId);
+        dataConnectionRef.current = dataConnection;
         dataConnection.on("open", () => {
           // Send current username to remote peer
-          dataConnection.send(currentUserName);
+          dataConnection.send({ username: currentUserName });
         });
-
+        dataConnection.on("data", (data) => {
+          handleData(data);
+        });
         const call = peerInstance.current.call(roomId, mediaStream);
         call.on("stream", (remoteStream) => {
           remoteVideoRef.current.srcObject = remoteStream;
@@ -185,6 +209,9 @@ const Room = () => {
         });
         call.on("close", () => {
           handleDisconnectCall();
+          showErrorToast({
+            message: "Call ended",
+          });
         });
         currentCallRef.current = call;
       }
@@ -212,6 +239,9 @@ const Room = () => {
       });
       currentCallRef.current.on("close", () => {
         handleDisconnectCall();
+        showErrorToast({
+          message: "Call ended",
+        });
       });
     } else {
       currentCallRef.current.close();
@@ -222,11 +252,15 @@ const Room = () => {
   const handleToggleVideo = () => {
     setVideoEnabled(!videoEnabled);
     streamRef.current.getVideoTracks()[0].enabled = !videoEnabled;
+    if (dataConnectionRef.current)
+      dataConnectionRef.current.send({ remoteVideoMuted: !videoEnabled });
   };
 
   const handleToggleAudio = () => {
     setAudioEnabled(!audioEnabled);
     streamRef.current.getAudioTracks()[0].enabled = !audioEnabled;
+    if (dataConnectionRef.current)
+      dataConnectionRef.current.send({ remoteAudioMuted: !audioEnabled });
   };
 
   const handleDisconnectCall = () => {
@@ -246,12 +280,13 @@ const Room = () => {
 
   const clickToCopy = () => {
     navigator.clipboard
-      .writeText(`http://127.0.0.1:5173/room?roomId=${peerId}`)
+      .writeText(`${window.location.origin}/?roomId=${peerId}`)
       .then(() => {
-        alert("Room url copied to clipboard");
+        showSuccessToast({ message: "Room url copied to clipboard" });
+        toggleShowRoomInfo();
       })
       .catch(() => {
-        alert("Could not copy the room url");
+        showErrorToast({ message: "Could not copy the room url" });
       });
   };
 
@@ -342,7 +377,15 @@ const Room = () => {
       )}
       <VideoContainer>
         <SelfVideo ref={localVideoRef} autoPlay muted />
+        {/* <RemoteContainer> */}
         <RemoteVideo ref={remoteVideoRef} autoPlay />
+        {/* {remoteAudioMuted && (
+            <FaMicrophoneSlash color={THEME_COLOR_PRIMARY} size="1rem" />
+          )}
+          {remoteVideoMuted && (
+            <FaVideoSlash color={THEME_COLOR_PRIMARY} size="1rem" />
+          )} */}
+        {/* </RemoteContainer> */}
         <ButtonContainer>
           <IconButton
             bgC
