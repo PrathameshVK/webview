@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
-import heroImg from "../assets/hero.webp";
+import heroImg from "../assets/telephone.png";
 import { Button } from "./common/Buttons";
 import FlexBox from "./common/Flexbox";
 import Layout from "./common/Layout";
@@ -39,15 +39,21 @@ const HeroText = styled(FlexBox)`
   }
 `;
 
+const HeroTitle = styled(Title)`
+  font-size: 3rem;
+  @media screen and (max-width: 767px) {
+    font-size: 2rem;
+  }
+`;
+
 const HeroImg = styled.img`
   width: 40%;
   height: auto;
   aspect-ratio: 1;
   object-fit: cover;
   border-radius: 2rem;
-  background-color: yellow;
   @media screen and (max-width: 767px) {
-    width: 80%;
+    height: 15rem;
   }
 `;
 
@@ -72,11 +78,11 @@ const Home = () => {
       <Container>
         <HeroContainer>
           <HeroText>
-            <Title bold fontSize="3rem">
+            <HeroTitle bold>
               Welcome to <Highlight>Webview</Highlight>! Your{" "}
               <Highlight color={THEME_COLOR_4}>very own</Highlight> calling
               companion
-            </Title>
+            </HeroTitle>
             <H1 fontWeight="light">
               Experience seamless one-on-one conversations with Webview&apos;s
               Peer-to-Peer Video Calls.

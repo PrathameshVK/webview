@@ -164,12 +164,9 @@ const Layout = ({ children }) => {
             <NavItem>
               <NavLink to="/">Home</NavLink>
             </NavItem>
-            {/* <NavItem>
+            <NavItem>
               <NavLink to="/about">About</NavLink>
-            </NavItem> */}
-            {/* <NavItem>
-              <NavLink to="/contact">Contact</NavLink>
-            </NavItem> */}
+            </NavItem>
             {!currentUser && (
               <NavItem>
                 <NavLink to="/auth">Sign in</NavLink>
