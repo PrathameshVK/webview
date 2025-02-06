@@ -54,6 +54,13 @@ const JoinContainer = styled.div`
   align-items: baseline;
 `;
 
+const WelcomeTitle = styled(Title)`
+  font-size: 3rem;
+  @media screen and (max-width: 767px) {
+    font-size: 1.5rem;
+  }
+`;
+
 const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [userName, setUserName] = useState(null);
@@ -99,13 +106,13 @@ const Dashboard = () => {
       {!isLoading && (
         <>
           <InputContainer>
-            <Title fontSize="3rem">
+            <WelcomeTitle>
               Hello {userName}!
               <br />
               This is your <Highlight color={THEME_COLOR_4}>personal</Highlight>
               <br />
               <Highlight>WebView</Highlight> portal
-            </Title>
+            </WelcomeTitle>
             <H1 fontWeight="light">
               Your space for effortless one-on-one connections
             </H1>
