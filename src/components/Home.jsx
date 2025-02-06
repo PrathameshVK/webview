@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
-import heroImg from "../assets/telephone.png";
+import heroImg from "../assets/telephone.webp";
 import { Button } from "./common/Buttons";
 import FlexBox from "./common/Flexbox";
 import Layout from "./common/Layout";
